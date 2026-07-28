@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Análise - Tráfego Pago</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --primary: #00e5ff;
+            --primary-hover: #00b3cc;
+            --bg-dark: #07090f;
+            --box-bg: #10141e;
+            --text-main: #ffffff;
+            --text-muted: #8b949e;
+            --border-color: #1f2937;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top, #161f30 0%, transparent 50%);
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--box-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px inset rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .system-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px var(--primary);
+            animation: blink 2s infinite;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #1a202c;
+            border-radius: 6px;
+            height: 8px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 14%;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        .step {
+            display: none;
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step h2 {
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            background-color: #171d2b;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 16px;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #1e2638;
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .processing {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .processing-text {
+            font-size: 18px;
+            color: var(--primary);
+            margin-top: 20px;
+            font-family: monospace;
+        }
+
+        .loader {
+            border: 4px solid #1a2235;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        .cta-container {
+            display: none;
+            text-align: center;
+        }
+
+        .cta-container h2 {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .cta-container p {
+            color: #d1d5db;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn-buy {
+            display: inline-block;
+            width: 100%;
+            padding: 20px;
+            background-color: var(--primary);
+            color: #000;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 800;
+            border-radius: 8px;
+            text-transform: uppercase;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2);
+            animation: pulse-btn 2s infinite;
+        }
+
+        .btn-buy:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(0, 229, 255, 0.4);
+        }
+
+        .alert-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #ff4d4d;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-btn {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 600px) {
+            .system-container {
+                border-radius: 0;
+                min-height: 100vh;
+                border: none;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="system-container">
+        
+        <div id="header-area">
+            <div class="system-header">
+                <div><span class="status-dot"></span> SISTEMA DE ANÁLISE DE ROI</div>
+                <div id="step-counter">Passo 1/7</div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="step active" id="step1">
+            <h2>1. Você está cansado de criar conteúdo, postar vídeos e implorar por seguidores sem fazer vendas?</h2>
+            <button class="option-btn" onclick="nextStep(1)">Sim, quero vender sem precisar aparecer e sem criar conteúdo</button>
+            <button class="option-btn" onclick="nextStep(1)">Ainda não comecei, mas já sei que não quero aparecer</button>
+        </div>
+
+        <div class="step" id="step2">
+            <h2>2. Qual é o seu maior obstáculo quando se fala em Tráfego Pago (Anúncios no Facebook/Google)?</h2>
+            <button class="option-btn" onclick="nextStep(2)">Medo de perder dinheiro testando o que não funciona</button>
+            <button class="option-btn" onclick="nextStep(2)">Acho as ferramentas de anúncios muito complexas</button>
+            <button class="option-btn" onclick="nextStep(2)">Tenho pavor de tomar bloqueio de conta</button>
+        </div>
+
+        <div class="step" id="step3">
+            <h2>3. Sendo realista: qual seria o seu orçamento diário para colocar uma campanha no ar e começar a testar?</h2>
+            <button class="option-btn" onclick="nextStep(3)">Posso começar com o mínimo (R$ 10 a R$ 20 por dia)</button>
+            <button class="option-btn" onclick="nextStep(3)">Posso investir de R$ 50 a R$ 100 por dia para acelerar</button>
+            <button class="option-btn" onclick="nextStep(3)">Quero a estratégia que exija o menor investimento possível</button>
+        </div>
+
+        <div class="step" id="step4">
+            <h2>4. Imagine ter campanhas rodando 24 horas por dia, caindo notificações de venda no seu celular enquanto você dorme. O que você faria com esse lucro?</h2>
+            <button class="option-btn" onclick="nextStep(4)">Reinvestiria no tráfego para escalar ainda mais rápido</button>
+            <button class="option-btn" onclick="nextStep(4)">Sairia do meu trabalho atual e viveria só de internet</button>
+            <button class="option-btn" onclick="nextStep(4)">Viajaria e trabalharia de qualquer lugar do mundo</button>
+        </div>
+
+        <div class="step" id="step5">
+            <h2>5. Você sabia que não precisa ser um expert? Existem campanhas prontas, funis testados e criativos validados que você só precisa "copiar e colar".</h2>
+            <button class="option-btn" onclick="nextStep(5)">Não sabia, era exatamente esse atalho que eu procurava!</button>
+            <button class="option-btn" onclick="nextStep(5)">Já ouvi falar, mas sempre me venderam a parte difícil</button>
+        </div>
+
+        <div class="step" id="step6">
+            <h2>6. O Tráfego Pago recompensa quem tem foco. Se eu te entregar os exatos botões para apertar e a estratégia validada, você se compromete a subir sua primeira campanha hoje?</h2>
+            <button class="option-btn" onclick="nextStep(6)">Sim, estou 100% comprometido em fazer acontecer</button>
+            <button class="option-btn" onclick="nextStep(6)">Sim, desde que me mostre o passo a passo na tela</button>
+        </div>
+
+        <div class="step" id="step7">
+            <h2>7. Acesso Liberado: Você está pronto para dominar o algoritmo, escalar suas vendas e se tornar um mestre em ROI positivo?</h2>
+            <button class="option-btn" style="border-color: var(--primary); color: var(--primary); font-weight: bold;" onclick="processResult()">SIM! QUERO ATIVAR MINHA CAMPANHA LUCRATIVA AGORA!</button>
+        </div>
+
+        <div class="processing" id="processing">
+            <div class="loader"></div>
+            <div class="processing-text" id="loading-text">Iniciando análise de dados...</div>
+        </div>
+
+        <div class="cta-container" id="cta-screen">
+            <h2>PERFIL VALIDADO PARA ESCALA! 📊</h2>
+            <p>Nosso sistema confirmou: você tem o <strong>perfil ideal</strong> para enriquecer com Tráfego Pago.<br><br>Você tem a clareza de que orgânico demora demais. Agora, só falta colocar as mãos no <strong>método validado</strong> para transformar cliques em dinheiro.</p>
+            
+            <a href="https://kiwify.app/dvx61L4?afid=6dJ0QLxi" class="btn-buy" target="_blank">
+                DOMINAR O TRÁFEGO PAGO AGORA
+            </a>
+            
+            <div class="alert-text">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Atenção: Acesso promocional aos mapas de campanhas expira em breve.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const totalSteps = 7;
+
+        function nextStep(current) {
+            document.getElementById('step' + current).classList.remove('active');
+            let next = current + 1;
+            document.getElementById('step' + next).classList.add('active');
+            let progress = (next / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('step-counter').innerText = 'Passo ' + next + '/' + totalSteps;
+        }
+
+        function processResult() {
+            document.getElementById('step7').classList.remove('active');
+            document.getElementById('header-area').style.display = 'none';
+            document.getElementById('processing').style.display = 'block';
+            let loadingText = document.getElementById('loading-text');
+
+            setTimeout(() => { loadingText.innerText = "Calculando potencial de ROI..."; }, 1000);
+            setTimeout(() => { loadingText.innerText = "Buscando estruturas de campanha liberadas..."; }, 2500);
+            setTimeout(() => { loadingText.innerText = "Vaga reservada com sucesso!"; }, 4000);
+            
+            setTimeout(() => {
+                document.getElementById('processing').style.display = 'none';
+                document.getElementById('cta-screen').style.display = 'block';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
